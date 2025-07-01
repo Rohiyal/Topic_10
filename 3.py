@@ -1,11 +1,41 @@
-import numpy as np
-from sklearn.linear_model import LinearRegression
+explanation = """
+Keterangan Regresi Linier Berganda:
+- Menggunakan semua fitur dalam dataset kecuali kolom target 'Harga'.
+- Data dinormalisasi menggunakan StandardScaler agar tiap fitur berada dalam skala yang sama.
+- Model Linear Regression dilatih dengan data yang telah dinormalisasi.
+- Dilakukan prediksi dan evaluasi terhadap data uji.
+- MSE dan R-squared dihitung untuk menilai performa model.
+- Koefisien setiap fitur ditampilkan untuk mengetahui seberapa besar kontribusinya terhadap prediksi harga rumah.
+- Koefisien diurutkan untuk memudahkan interpretasi fitur yang paling berpengaruh.
+"""
+print(explanation)
 
-X = np.array([1, 3, 5, 7, 9]).reshape(-1, 1)
-Y = np.array([150, 120, 90, 60, 30])
+from sklearn.preprocessing import StandardScaler
 
-model = LinearRegression().fit(X, Y)
-prediksi = model.predict([[4]])
+X = df.drop('Harga', axis=1)
+y = df['Harga']
 
-print("Model: Y = {:.2f}X + {:.2f}".format(model.coef_[0], model.intercept_))
-print("Prediksi harga jual jika usia kendaraan 4 tahun: {:.2f} juta rupiah".format(prediksi[0]))
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = LinearRegression()
+model.fit(X_train_scaled, y_train)
+y_pred = model.predict(X_test_scaled)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("\n Hasil Regresi Linear Berganda:")
+print(f"MSE: {mse:.2f}")
+print(f"R-squared: {r2:.2f}")
+
+coefficients = pd.DataFrame({
+    'Fitur': X.columns,
+    'Koefisien': model.coef_
+}).sort_values(by='Koefisien', ascending=False)
+
+print("\n Koefisien Model:")
+print(coefficients)
